@@ -16,11 +16,11 @@
     Skip the clean step before building. Useful for incremental builds during development.
 
 .EXAMPLE
-    PS> .\Build-DllFiles.ps1
+    PS> .\Build.ps1
     Builds the DSCParser C# projects in Release configuration.
 
 .EXAMPLE
-    PS> .\Build-DllFiles.ps1 -Configuration Debug -SkipClean
+    PS> .\Build.ps1 -Configuration Debug -SkipClean
     Builds in Debug configuration without cleaning first.
 
 .NOTES
@@ -152,7 +152,7 @@ function Build-Project {
     }
 
     Write-Host ""
-    Write-Host "✓ Build completed successfully!" -ForegroundColor Green
+    Write-Host "Build completed successfully!" -ForegroundColor Green
     Write-Host "Output location: $targetDir" -ForegroundColor Cyan
 
     # Display file information

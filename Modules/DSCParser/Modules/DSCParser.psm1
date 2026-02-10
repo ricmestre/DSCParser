@@ -1,7 +1,5 @@
-#
 # DSCParser.CSharp PowerShell Module
 # Loads the C# assembly using Assembly Load Context for isolation
-#
 
 $Script:ModuleRoot = $PSScriptRoot
 
@@ -14,6 +12,7 @@ $Script:AssemblyLoaded = $false
 function Initialize-DscParserAssembly
 {
     [CmdletBinding()]
+    [OutputType([System.Boolean])]
     param()
 
     if ($Script:AssemblyLoaded)
