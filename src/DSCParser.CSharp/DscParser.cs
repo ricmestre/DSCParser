@@ -273,7 +273,19 @@ namespace DSCParser.CSharp
                 // 1 - Resource Instance Name
                 // 2 - Key/Pair Value list of parameters.
                 string resourceType = resource.CommandElements[0].ToString();
-                string resourceInstanceName = ((StringConstantExpressionAst)resource.CommandElements[1]).Value;
+                string resourceInstanceName = string.Empty;
+                if (resource.CommandElements[1] is StringConstantExpressionAst resourceInstanceNameAst)
+                {
+                    resourceInstanceName = resourceInstanceNameAst.Value;
+                }
+                else if (resource.CommandElements[1] is ExpandableStringExpressionAst resourceInstanceNameExpAst)
+                {
+                    resourceInstanceName = resourceInstanceNameExpAst.Value;
+                }
+                else
+                {
+                    throw new InvalidOperationException("Failed to parse resource instance name in DSC configuration.");
+                }
 
                 currentResourceInfo.ResourceName = resourceType;
                 currentResourceInfo.ResourceInstanceName = resourceInstanceName;
@@ -486,18 +498,30 @@ namespace DSCParser.CSharp
                     }
                     switch (arrayElementDefinition.Expression)
                     {
-                        // Array literals are arrays of strings like @("value1", "value2"), integers like @(1,2,3) or variables like @($var1, $var2)
+                        // Array literals are arrays of strings like @("value1", "value2"), integers like @(1,2,3)
+                        // variables like @($var1, $var2), expandable strings like @("https://$OrganizationName/", "https://$TenantGuid/")
+                        // or more types of elements
                         case ArrayLiteralAst arrayLiteral:
                             {
-                                if (arrayLiteral.Elements[0] is ConstantExpressionAst constant)
+                                return arrayLiteral.Elements.Select(element =>
                                 {
-                                    return arrayLiteral.Elements.Select(element => ((ConstantExpressionAst)element).Value).ToList();
-                                }
-                                if (arrayLiteral.Elements[0] is VariableExpressionAst variable)
-                                {
-                                    return arrayLiteral.Elements.Select(element => ((VariableExpressionAst)element).ToString() as object).ToList();
-                                }
-                                break;
+                                    if (element is ConstantExpressionAst constElement)
+                                    {
+                                        return constElement.Value;
+                                    }
+                                    else if (element is VariableExpressionAst variableElement)
+                                    {
+                                        return variableElement.ToString();
+                                    }
+                                    else if (element is ExpandableStringExpressionAst expStringElement)
+                                    {
+                                        return expStringElement.Value;
+                                    }
+                                    else
+                                    {
+                                        throw new InvalidOperationException($"Unexpected array element type in array literal. The type was: {element.GetType().FullName}");
+                                    }
+                                }).ToList();
                             }
                         // Single constant string like @("value1")
                         case StringConstantExpressionAst constantString:
@@ -510,6 +534,10 @@ namespace DSCParser.CSharp
                         // Single variable like @($var1)
                         case VariableExpressionAst variable:
                             returnList.Add(variable.ToString());
+                            break;
+                        // Single expandable string like @("https://$OrganizationName/")
+                        case ExpandableStringExpressionAst expString:
+                            returnList.Add(expString.Value);
                             break;
                         default:
                             break;
