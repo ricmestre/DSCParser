@@ -109,7 +109,7 @@ public class DscResourceHelperTests
     [Fact]
     public void IsPatternMatched_WithQuestionMarkWildcard_ShouldMatchSingleChar()
     {
-        string[] patterns = ["Resource?"];
+        string[] patterns = ["Resource.?$"];
 
         Assert.True(DscResourceHelpers.IsPatternMatched(patterns, "Resource1"));
         Assert.True(DscResourceHelpers.IsPatternMatched(patterns, "ResourceA"));
