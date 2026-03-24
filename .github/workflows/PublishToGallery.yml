@@ -10,7 +10,7 @@ jobs:
     runs-on: windows-latest
 
     # Only when run from the main repo
-    if: github.repository == 'microsoft/DSCParser'
+    if: github.repository == 'Microsoft365DSC/DSCParser'
 
     steps:
       - name: Checkout Repository
